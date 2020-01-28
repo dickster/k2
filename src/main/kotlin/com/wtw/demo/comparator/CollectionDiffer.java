@@ -11,6 +11,9 @@ public class CollectionDiffer implements Differ<Collection> {
     // compare.
     // if the collection
 
+    // collection use cases....
+    // if int/boolean/string/double
+
     private Differ itemDiffer;
 
     public CollectionDiffer(Differ itemDiffer) {
@@ -36,7 +39,9 @@ public class CollectionDiffer implements Differ<Collection> {
             }
         }
 
+        System.out.println("TODO: handle collections....");
         DiffResult result = new DiffResult(a,b);
+        // calculate the diffs here and add them...
         return result.count()==0 ? Optional.empty() : Optional.of(result);
     }
 

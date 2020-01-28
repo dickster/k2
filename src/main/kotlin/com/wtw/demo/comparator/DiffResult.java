@@ -10,7 +10,7 @@ public class DiffResult {
     private Object to;
     private DiffType type;
     private String description;
-    private Delegate delegate;
+    private Delegate delegate = new NonTerminalDelegate();
 
 
     public DiffResult(DiffType type, Object from, Object to) {
@@ -18,17 +18,33 @@ public class DiffResult {
         this.from = from;
         this.to = to;
         this.type = type;
+        forTerminalNode();
     }
 
     public DiffResult(Object from, Object to) {
         // store this for later...need to know what the two objects are even if you dont have DIFFs
         this.from = from;
         this.to = to;
+        // assuming this is non-terminal.  you can override by calling forTerminalNode() later if you want.
+        forNonTerminalNode();
     }
 
-    public static <S> DiffResult change(S a, S b) {
+    public static DiffResult error(Object a, Object b, String msg) {
+        return new DiffResult(DiffType.ERROR, a, b).withDescription(msg);
+    }
+
+    public static DiffResult change(Object a, Object b) {
         return new DiffResult(DiffType.CHANGE, a, b);
     }
+
+    public static DiffResult deletion(Object a, Object b) {
+        return new DiffResult(DiffType.DELETE, a, b);
+    }
+
+    public static DiffResult addition(Object a, Object b) {
+        return new DiffResult(DiffType.ADD, a, b);
+    }
+
 
     public DiffResult forNonTerminalNode() {
         delegate = new NonTerminalDelegate();
@@ -78,6 +94,15 @@ public class DiffResult {
         return this;
     }
 
+    @Override
+    public String toString() {
+        return "DiffResult{" +
+                "type=" + type +
+                ", from=" + from +
+                ", to=" + to +
+                ((description==null) ? "" : description) +
+                '}';
+    }
 
     interface Delegate {
         public List<DiffResult> list();
@@ -141,7 +166,11 @@ public class DiffResult {
 
         @Override
         public int count() {
-            return diffs.size();
+            // we have to do a deep count
+            return diffs.values()
+                    .stream()
+                    .mapToInt(x -> x.count())
+                    .sum();
         }
 
     }

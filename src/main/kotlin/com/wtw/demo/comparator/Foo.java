@@ -7,12 +7,11 @@ import com.wtw.demo.comparator.annotations.DifferCreationType;
 @Diffable
 public class Foo {
 
-    // lookup bean, or class type, and options..?
-    @Diffable(BarDiffer.class)
+    @Diffable
     private Bar bar = new Bar();
 
     @Diffable(type=DifferCreationType.BY_CLASS, value=StringDiffer.class)
-    private String blah = "blah";
+    private String blah = "blah"+(Math.random()+"").substring(1,3);
 
     public Bar getBar() {
         return bar;
@@ -24,5 +23,13 @@ public class Foo {
 
     public void setBlah(String blah) {
         this.blah = blah;
+    }
+
+    @Override
+    public String toString() {
+        return "Foo{" +
+                "bar=" + bar +
+                ", blah='" + blah + '\'' +
+                '}';
     }
 }

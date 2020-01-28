@@ -11,7 +11,7 @@ public class StringDiffer implements Differ<String> {
     public <S extends String> Optional<DiffResult> diff(S a, S b) {
         boolean comparison = Objects.equals(a,b);
         return comparison ?
-                Optional.of(new DiffResult(DiffType.CHANGE, a, b)) :
-                Optional.empty();
+                Optional.empty() :
+                Optional.of(DiffResult.change(a, b));
     }
 }

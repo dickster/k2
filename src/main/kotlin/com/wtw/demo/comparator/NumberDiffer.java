@@ -10,7 +10,7 @@ public class NumberDiffer implements Differ<Number> {
     public <S extends Number> Optional<DiffResult> diff(S a, S b) {
         double diff = Math.abs(a.doubleValue() - b.doubleValue());
         return diff > tolerance ?
-                Optional.of(new DiffResult(DiffType.CHANGE, a, b)) :
+                Optional.of(DiffResult.change(a, b)) :
                 Optional.empty();
     }
 }

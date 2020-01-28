@@ -3,8 +3,6 @@ package com.wtw.demo.comparator;
 import com.wtw.demo.comparator.annotations.Diffable;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,7 +10,7 @@ public class AnnotatedDifferFactory implements DifferFactory {
 
     private Class clazz;
 
-    private Map<String, Class<? extends Differ>> differsByClass = new HashMap();
+    private Map<String, Class<? extends Differ>> differs = new HashMap();
 
     public AnnotatedDifferFactory(Class clazz) {
         this.clazz = clazz;
@@ -25,21 +23,20 @@ public class AnnotatedDifferFactory implements DifferFactory {
             if (diffable != null) {
                 // at this point assume its never null.
                 Class<? extends Differ> differClass = diffable.value();
-                differsByClass.put(field.getName(), differClass);
+                differs.put(field.getName(), differClass);
             }
         }
 
     }
 
 
-
     @Override
     public Differ getDiffer(String fieldName) {
-        Class<? extends Differ> aClass = differsByClass.get(fieldName);
+        Class<? extends Differ> aClass = differs.get(fieldName);
         try {
             return aClass.newInstance();
         } catch (ReflectiveOperationException e) {
-            return new ErrorDiffer("cant instantiate differ class " + differsByClass.get(fieldName) + " for " + fieldName);
+            return new ErrorDiffer("cant instantiate differ class " + differs.get(fieldName) + " for " + fieldName);
         }
     }
 

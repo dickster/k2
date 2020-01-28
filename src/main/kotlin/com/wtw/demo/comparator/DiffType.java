@@ -5,6 +5,7 @@ public enum DiffType {
     CHANGE,
     MOVE,
     DELETE,
-    ADD
+    ERROR,
+    ADD;
 
 }

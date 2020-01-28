@@ -1,20 +1,19 @@
-package com.wtw.demo.comparator;
+package com.wtw.demo.comparator.annotations;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import com.wtw.demo.comparator.Differ;
+import com.wtw.demo.comparator.ObjectDiffer;
 
-@Target(ElementType.FIELD)
+import java.lang.annotation.*;
+
+@Target({ElementType.FIELD,ElementType.TYPE})
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
-public @interface CompareOptions {
+public @interface Diffable {
 
-    boolean nullIsEmpty() default true;
-    boolean ignore() default false;
-    boolean stopOnDiff() default false;
-    CompareViewType view() default CompareViewType.LEAF;
+    Class value() default ObjectDiffer.class;
+    // use enum here instead.
+    DifferCreationType type() default DifferCreationType.BY_CLASS;
+    String name() default "";  // only used in conjunction with BEAN_NAME
 
 }
 

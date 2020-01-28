@@ -1,4 +1,4 @@
-package com.wtw.demo.comparator;
+package com.wtw.demo.comparator.annotations;
 
 
 import java.lang.annotation.*;

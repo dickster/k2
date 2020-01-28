@@ -1,5 +1,6 @@
 package com.wtw.demo.comparator;
 
+import com.wtw.demo.comparator.annotations.Diffable;
 import com.wtw.demo.entity.Policy;
 
 
@@ -8,13 +9,13 @@ import java.util.*;
 
 public class ObjectDiffer implements Differ {
 
-    private DiffConfig config;
+    private DifferConfig config;
 
     public ObjectDiffer() {
 
     }
 
-    public ObjectDiffer(DiffConfig config) {
+    public ObjectDiffer(DifferConfig config) {
 
     }
 
@@ -23,7 +24,15 @@ public class ObjectDiffer implements Differ {
     }
 
     private Differ getDiffer(String field) {
-        return config.getDifferFactory().getDiffer(field);
+        // if config doesn't have it, ask parent.
+        Differ differ = config.getDifferFactory().getDiffer(field);
+        if (differ != null) {
+            return differ;
+        }
+        differ = config.getParentConfig().getDifferFactory().getDiffer(field);
+
+        return differ != null ? differ :
+                new ErrorDiffer("cant find differ for field " + field);
     }
 
     private Object getFieldValue(String field, Object value) {
@@ -38,9 +47,11 @@ public class ObjectDiffer implements Differ {
     }
 
 
+    // TODO : this should throw exceptions...
     public Optional<DiffResult> diff(Object a, Object b) {
 
-        maybeInitConfig(a,b);
+        maybeInitConfig(a, b);
+
         DiffResult result = null;
         for (String field : getFields()) {
 
@@ -55,13 +66,12 @@ public class ObjectDiffer implements Differ {
             Optional<DiffResult> diff = differ.diff(valueA, valueB);
 
             if (diff.isPresent()) {
-                if (result==null) {
+                if (result == null) {
                     result = new DiffResult(a, b);
                 }
                 System.out.println("    difference - " + diff.get());
                 result.add(field, diff.get());
-            }
-            else {
+            } else {
                 System.out.println("    fields are the same.");
             }
         }
@@ -69,39 +79,40 @@ public class ObjectDiffer implements Differ {
         return Optional.ofNullable(result);
     }
 
-    private void maybeInitConfig(Object a, Object b) {
+    private DifferConfig maybeInitConfig(Object a, Object b) {
         // if config has already been set via constructor we'll leave it.
         // if not we'll take a look at object types and try to set a reasonable default config object.
+
+        Diffable diffable = a.getClass().getAnnotation(Diffable.class);
+        // or if any of the fields are annotated...
+        if (diffable != null) {
+            config = new AnnotatedDifferConfig(config, a.getClass(), b.getClass());
+        }
+        if (config == null) {
+            config = new DefaultDifferConfig(config, a.getClass(), b.getClass());
+        }
+        return config;
     }
 
 
-    static void main(String... args) {
-        Policy a = new Policy();
-        a.setName("A");
+    public static void main(String... args) {
+//        Policy a = new Policy();
+//        a.setName("A");
+//
+//        Policy b = new Policy();
+//        b.setName("B");
 
-        Policy b = new Policy();
-        b.setName("B");
+        Foo a = new Foo();
 
-        // if the class has @Comparable annotation on it then reflect.   user can override config later.
-        // if you have class level annotation and no fields, then it will include all.
+        Foo b = new Foo();
 
-        // will generate a default view.  assume this class isn't annotated.  if it is, uses Field annotations.
-
-        // uses default config/types.  inspects all fields in object.  checks to make sure not primitive
-        // assert(!clazz.isPrimitive())  when comparing, SHOULD also check to see if !JSONObject.
         ObjectDiffer differ = new ObjectDiffer();
         //ObjectDiffer comparator = new ObjectDiffer(config);
 
-        // when you call compare, if there is no config specified it will  lazily create a default config and set it.
-        //  Once config has been set (lazily or not) it cant be set again.
-
         Optional<DiffResult> result = differ.diff(a, b);
 
-        DiffResult diff=result.orElseThrow(()->new IllegalStateException("there should be a diff"));
+        DiffResult diff = result.orElseThrow(() -> new IllegalStateException("there should be a diff"));
 
-        // do something with results...
-        //  should be able to see collapsed/aggregated levels.  e.g. only show vehicle Diff, not vehicle.vin, vehicle.year, etc...
-        // when comaparator is saving Diff's, it must stuff in the name of the field for later purposes.
         diff.list();  // returns List<Diff>,  but I need to save context for each...
 
 //        diff.list(d -> d.toString());  // returns List<Diff>,  but I need to save context for each...
@@ -109,8 +120,12 @@ public class ObjectDiffer implements Differ {
         //        diff.list(formatter, aggregatorFn);  // returns List<Diff>,  but I need to save context for each...
 
         // what do I get back?  a DiffResult
-        diff.get("vehicle.vin");
-      //  diff.getFieldDiff("info", "locations");
+        try {
+            diff.get("vehicle.vin");
+        } catch (NoSuchFieldException e) {
+            System.out.println("cant find field!!!");
+        }
+        //  diff.getFieldDiff("info", "locations");
         //diff.get(["info","locations"]);
 
     }

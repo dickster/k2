@@ -4,7 +4,7 @@ package com.wtw.demo.comparator;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-class JSONAccessor {
+public class JSONAccessor {
 
     public Object getFieldValue(String fieldName, Object value) throws NoSuchFieldException {
         try {

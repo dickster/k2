@@ -1,13 +1,16 @@
 package com.wtw.demo.comparator;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Optional;
 
 public class NumberDiffer implements Differ<Number> {
 
     private Double tolerance = 0.0;
 
+    @NotNull
     @Override
-    public <S extends Number> Optional<DiffResult> diff(S a, S b) {
+    public Optional<DiffResult> diff(Number a, Number b) {
         double diff = Math.abs(a.doubleValue() - b.doubleValue());
         return diff > tolerance ?
                 Optional.of(DiffResult.change(a, b)) :

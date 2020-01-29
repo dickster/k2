@@ -22,7 +22,7 @@ public class AnnotatedDifferFactory implements DifferFactory {
             Diffable diffable = field.getAnnotation(Diffable.class);
             if (diffable != null) {
                 // at this point assume its never null.
-                Class<? extends Differ> differClass = diffable.value();
+                Class differClass = diffable.value();
                 differs.put(field.getName(), differClass);
             }
         }

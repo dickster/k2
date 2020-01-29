@@ -2,6 +2,7 @@ package com.wtw.demo.comparator;
 
 
 import java.util.*;
+import java.util.function.BinaryOperator;
 
 
 public class DiffResult {
@@ -100,7 +101,7 @@ public class DiffResult {
                 "type=" + type +
                 ", from=" + from +
                 ", to=" + to +
-                ((description==null) ? "" : description) +
+                ((description == null) ? "" : description) +
                 '}';
     }
 
@@ -153,15 +154,28 @@ public class DiffResult {
             diffs.put(name, diffResult);
         }
 
-        public Optional<DiffResult> get(String path) {
+        public Optional<DiffResult> get(String path) throws NoSuchFieldException {
+
             //chop off first, get it and do get and rest of path.
-            String[] split = path.split(".");
-            // String first = blah
-            // if diffs.get(first) then
-            // D1 = diffs.get(first);
-            //   return D1.get(restofPath)
-            System.out.println("TODO: implement this get stuff....");
+            String[] split = path.split("\\.");
+
+            Optional<DiffResult> node = getChildField(split[0]);
+            if (node.isPresent()) {
+                String[] remainder = Arrays.asList(split)
+                        .subList(1, split.length)
+                        .toArray(new String[0]);
+                if (remainder.length == 0) {
+                    // we're finished...return this value.
+                    return Optional.of(node.get());
+                }
+                return node.get().get(String.join(".", remainder));
+            }
             return Optional.empty();
+        }
+
+        public Optional<DiffResult> getChildField(String path) {
+            // path is not null!  but result might be.
+            return Optional.ofNullable(diffs.get(path));
         }
 
         @Override

@@ -11,7 +11,10 @@ public class Foo {
     private Bar bar = new Bar();
 
     @Diffable(type=DifferCreationType.BY_CLASS, value=StringDiffer.class)
-    private String blah = "blah"+(Math.random()+"").substring(1,3);
+    private String blah = "blah";
+
+
+
 
     public Bar getBar() {
         return bar;
